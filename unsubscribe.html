@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>配信停止</title>
+<style>
+  body { font-family: "Hiragino Sans", "Noto Sans JP", "Yu Gothic", sans-serif; max-width: 520px; margin: 12vh auto; padding: 0 20px; color: #1d2733; line-height: 1.7; }
+  h1 { font-size: 20px; }
+  button { font-size: 16px; padding: 10px 24px; border-radius: 6px; border: 0; background: #0f2f5f; color: #fff; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: default; }
+</style>
+</head>
+<body>
+<!--
+  えくしびメールの配信停止ページ（静的HTML）。
+  Apps Script のページを直接開くと、複数のGoogleアカウントでログイン中のブラウザでは
+  「ファイルを開くことができません」になるため、このページから Cookie を送らずに記録だけを送る。
+-->
+<h1 id="h">配信停止</h1>
+<p id="lead">株式会社がくまるくん からのメール配信を停止します。</p>
+<button id="b" type="button">配信を停止する</button>
+<p id="m"></p>
+<script>
+  var ENDPOINT = "https://script.google.com/macros/s/AKfycbwJqRfoPiaI-TJDLCEjl06MOc7yK62lfg15oWcXnM17aGFIXk3CPcMN2JuO40wDLCbglA/exec";
+  var token = new URLSearchParams(location.search).get("t") || "";
+  var b = document.getElementById("b"), m = document.getElementById("m");
+  if (!/^[A-Za-z0-9_-]{16,64}$/.test(token)) {
+    document.getElementById("lead").textContent = "リンクが正しくありません。メールに記載のリンクから開いてください。";
+    b.style.display = "none";
+  }
+  b.addEventListener("click", function () {
+    b.disabled = true;
+    m.textContent = "処理しています…";
+    fetch(ENDPOINT + "?a=u&t=" + encodeURIComponent(token), { method: "POST", mode: "no-cors", credentials: "omit" })
+      .then(function () {
+        document.getElementById("h").textContent = "配信を停止しました";
+        document.getElementById("lead").textContent = "株式会社がくまるくん からのメール配信を停止しました。反映まで数日かかる場合があります。";
+        b.style.display = "none";
+        m.textContent = "";
+      })
+      .catch(function () {
+        b.disabled = false;
+        m.textContent = "通信に失敗しました。時間をおいてもう一度お試しください。";
+      });
+  });
+</script>
+</body>
+</html>
